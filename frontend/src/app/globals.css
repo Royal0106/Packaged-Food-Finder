@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #f6f1e8;
+  --color-cream-dark: #efe6d6;
+  --color-sand: #eadfcb;
+  --color-sand-dark: #d8c7a8;
+  --color-ink: #241c14;
+  --color-ink-muted: #6d6256;
+  --color-forest: #1f4d3a;
+  --color-forest-dark: #16382a;
+  --color-terracotta: #c45c26;
+  --color-terracotta-dark: #a3491b;
+  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-fraunces);
+}
+
+html,
+body {
+  background: #f6f1e8;
+  color: #241c14;
+}
+
+body {
+  font-family: var(--font-source-sans), "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+::selection {
+  background: #1f4d3a;
+  color: #f6f1e8;
+}
