@@ -5,6 +5,11 @@ const { getProtectedNutrition } = vi.hoisted(() => ({
   getProtectedNutrition: vi.fn(),
 }));
 
+vi.mock("../src/services/user.service", () => ({
+  getDemoUser: vi.fn(),
+  ensureDemoUser: vi.fn().mockResolvedValue({ id: 1 }),
+}));
+
 vi.mock("../src/services/product.service", async () => {
   const actual = await vi.importActual<typeof import("../src/services/product.service")>(
     "../src/services/product.service",

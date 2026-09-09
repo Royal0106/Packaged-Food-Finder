@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { getConfig } from "./config";
 import { stripeWebhookHandler } from "./controllers/stripe.controller";
+import { ensureDemoUserMiddleware } from "./middleware/demoUser";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { apiRouter } from "./routes";
 import { asyncHandler } from "./utils/asyncHandler";
@@ -18,6 +19,7 @@ export function createApp() {
       allowedHeaders: ["Content-Type", "Stripe-Signature"],
     }),
   );
+  app.use(ensureDemoUserMiddleware);
 
   app.post(
     "/api/stripe/webhook",
@@ -32,3 +34,8 @@ export function createApp() {
 
   return app;
 }
+
+// Vercel (and other serverless hosts) require a default export that is the
+// Express app itself, not a factory function and not app.listen().
+const app = createApp();
+export default app;

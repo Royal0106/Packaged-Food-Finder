@@ -131,6 +131,21 @@ npm run dev
 
 Keep `stripe listen` running while testing checkout.
 
+## Deploying to Vercel
+
+This Express API is built for Node. Vercel looks at `backend/src/app.ts` and requires a **default export** of the Express app (not `app.listen()`). That export is already in place.
+
+Create a Vercel project with:
+
+- **Root Directory:** `backend`
+- **Install Command:** `npm install && npx prisma generate`
+
+Set the same environment variables as `backend/.env.example`, using your production frontend origin for `FRONTEND_URL` (for example `https://your-app.vercel.app`).
+
+The Next.js frontend should be a **separate** Vercel project with Root Directory `frontend` and `NEXT_PUBLIC_API_URL` pointing at the backend URL.
+
+Do not point the frontend project at `backend/src/app.ts`.
+
 ## Testing
 
 From `backend/`:
