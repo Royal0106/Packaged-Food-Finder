@@ -140,7 +140,21 @@ Create a Vercel project with:
 - **Root Directory:** `backend`
 - **Install Command:** `npm install && npx prisma generate`
 
-Set the same environment variables as `backend/.env.example`, using your production frontend origin for `FRONTEND_URL` (for example `https://your-app.vercel.app`).
+Set these **Environment Variables** on the backend Vercel project (Production):
+
+- `DATABASE_URL`
+- `FRONTEND_URL` (your deployed frontend origin, not localhost)
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_ID`
+
+If the database is Aiven MySQL, either keep `ssl-mode=REQUIRED` (the API now maps this for Prisma) or use:
+
+```text
+mysql://USER:PASSWORD@HOST:PORT/DATABASE?sslaccept=strict
+```
+
+Also allow public connections from Aiven (or Vercel will not be able to reach MySQL). After changing env vars, redeploy.
 
 The Next.js frontend should be a **separate** Vercel project with Root Directory `frontend` and `NEXT_PUBLIC_API_URL` pointing at the backend URL.
 

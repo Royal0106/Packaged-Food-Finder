@@ -4,10 +4,14 @@ import { ensureDemoUser } from "../services/user.service";
 let demoUserReady: Promise<void> | undefined;
 
 export function ensureDemoUserMiddleware(
-  _req: Request,
+  req: Request,
   _res: Response,
   next: NextFunction,
 ) {
+  if (req.path.includes("/health")) {
+    return next();
+  }
+
   if (!demoUserReady) {
     demoUserReady = Promise.resolve(ensureDemoUser()).then(() => undefined);
   }

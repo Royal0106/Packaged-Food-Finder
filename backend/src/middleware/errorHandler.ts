@@ -12,6 +12,9 @@ export function errorHandler(
     return sendError(res, error.statusCode, error.code, error.message);
   }
 
+  const reason = error instanceof Error ? error.message : "Unknown error";
+  console.error(`Unhandled API error: ${reason}`);
+
   return sendError(
     res,
     500,

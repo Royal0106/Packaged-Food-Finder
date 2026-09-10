@@ -1,4 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install && npx prisma generate"
+  "installCommand": "npm install && npx prisma generate",
+  "functions": {
+    "src/app.ts": {
+      "includeFiles": "{prisma/**,node_modules/.prisma/client/**}"
+    }
+  }
 }
