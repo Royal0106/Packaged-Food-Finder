@@ -21,6 +21,17 @@ export function createApp() {
   );
   app.use(ensureDemoUserMiddleware);
 
+  app.get("/", (_req, res) => {
+    res.json({
+      success: true,
+      data: {
+        name: "FoodLens API",
+        status: "ok",
+        health: "/api/health",
+      },
+    });
+  });
+
   app.post(
     "/api/stripe/webhook",
     express.raw({ type: "application/json" }),

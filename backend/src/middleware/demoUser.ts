@@ -8,7 +8,7 @@ export function ensureDemoUserMiddleware(
   _res: Response,
   next: NextFunction,
 ) {
-  if (req.path.includes("/health")) {
+  if (req.path === "/" || req.path.includes("/health")) {
     return next();
   }
 
