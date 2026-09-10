@@ -1,5 +1,7 @@
 import Stripe from "stripe";
 import { getConfig } from "../config";
+import { memoryStore } from "../lib/memoryStore";
+import { isUnreachableError, markMysqlDown, mysqlEnabled } from "../lib/mysqlMode";
 import { prisma } from "../lib/prisma";
 import { Errors } from "../utils/errors";
 import { mapStripeSubscriptionStatus, unixToDate } from "../utils/subscription";
@@ -133,11 +135,26 @@ async function updateDemoUser(data: {
   subscriptionStatus?: "inactive" | "active" | "canceled" | "past_due";
   subscriptionCurrentPeriodEnd?: Date | null;
 }) {
-  const user = await getDemoUser();
-  await prisma.user.update({
-    where: { id: user.id },
-    data,
-  });
+  if (!(await mysqlEnabled())) {
+    memoryStore.updateUser(data);
+    return;
+  }
+
+  try {
+    const user = await getDemoUser();
+    await prisma.user.update({
+      where: { id: user.id },
+      data,
+    });
+  } catch (error) {
+    if (isUnreachableError(error)) {
+      markMysqlDown();
+      memoryStore.updateUser(data);
+      return;
+    }
+
+    throw error;
+  }
 }
 
 function getSubscriptionPeriodEnd(subscription: Stripe.Subscription): Date | null {

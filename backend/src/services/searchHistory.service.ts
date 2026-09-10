@@ -1,12 +1,20 @@
 import type { SearchHistory } from "@prisma/client";
 import { SEARCH_HISTORY_LIMIT } from "../config";
+import { memoryStore } from "../lib/memoryStore";
+import { isUnreachableError, markMysqlDown, mysqlEnabled } from "../lib/mysqlMode";
 import { prisma } from "../lib/prisma";
 import { Errors } from "../utils/errors";
 import { getDemoUser } from "./user.service";
 
 export async function recordSearch(query: string, language: string): Promise<void> {
+  const user = await getDemoUser();
+
+  if (!(await mysqlEnabled())) {
+    memoryStore.recordSearch(user.id, query, language);
+    return;
+  }
+
   try {
-    const user = await getDemoUser();
     const existing = await prisma.searchHistory.findFirst({
       where: {
         userId: user.id,
@@ -32,6 +40,12 @@ export async function recordSearch(query: string, language: string): Promise<voi
 
     await trimSearchHistory(user.id);
   } catch (error) {
+    if (isUnreachableError(error)) {
+      markMysqlDown();
+      memoryStore.recordSearch(user.id, query, language);
+      return;
+    }
+
     if (error instanceof Error && error.name === "AppError") {
       throw error;
     }
@@ -40,14 +54,24 @@ export async function recordSearch(query: string, language: string): Promise<voi
 }
 
 export async function listRecentSearches(): Promise<SearchHistory[]> {
+  const user = await getDemoUser();
+
+  if (!(await mysqlEnabled())) {
+    return memoryStore.listSearches(user.id);
+  }
+
   try {
-    const user = await getDemoUser();
-    return prisma.searchHistory.findMany({
+    return await prisma.searchHistory.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: SEARCH_HISTORY_LIMIT,
     });
   } catch (error) {
+    if (isUnreachableError(error)) {
+      markMysqlDown();
+      return memoryStore.listSearches(user.id);
+    }
+
     if (error instanceof Error && error.name === "AppError") {
       throw error;
     }

@@ -50,7 +50,14 @@ export function parseLanguage(lang: unknown) {
 export async function searchProducts(rawQuery: unknown, rawLang: unknown) {
   const { q, lang } = parseSearchQuery({ q: rawQuery, lang: rawLang });
   const products = await openFoodFactsService.searchProducts(q, lang);
-  await recordSearch(q, lang);
+
+  try {
+    await recordSearch(q, lang);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Failed to record search history: ${reason}`);
+  }
+
   return { query: q, language: lang, products };
 }
 
