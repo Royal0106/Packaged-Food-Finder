@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { getConfig } from "./config";
+import { normalizeOrigin } from "./config/env";
 import { stripeWebhookHandler } from "./controllers/stripe.controller";
 import { ensureDemoUserMiddleware } from "./middleware/demoUser";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
@@ -10,12 +11,20 @@ import { asyncHandler } from "./utils/asyncHandler";
 export function createApp() {
   const app = express();
   const config = getConfig();
+  const allowedOrigin = normalizeOrigin(config.FRONTEND_URL);
 
   app.disable("x-powered-by");
   app.use(
     cors({
-      origin: config.FRONTEND_URL,
-      methods: ["GET", "POST"],
+      origin(origin, callback) {
+        if (!origin || normalizeOrigin(origin) === allowedOrigin) {
+          callback(null, true);
+          return;
+        }
+
+        callback(null, false);
+      },
+      methods: ["GET", "POST", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Stripe-Signature"],
     }),
   );
